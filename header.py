@@ -20,9 +20,16 @@ def get_sub_domain_name(url):
 
 HOMEPAGE = 'http://truyentranh.net/'
 DOMAIN_NAME = get_domain_name(HOMEPAGE)
+root_url = set(['http://truyentranh.net', 'http://truyentranh.net/blog'])
 
-def is_manga_link(link):
+def is_manga_url(url):
 	
-    root_link = set(['http://truyentranh.net', 'http://truyentranh.net/blog'])
+	return ('html' not in url) and ('/Chap-' not in url) and ('/chap-' not in url) and (url not in root_url)
+
+def is_chapter_url(url):
+
+	return ('html' not in url) and (('/Chap-' in url) or ('/chap-' in url)) and (url not in root_url)
 	
-    return ('html' not in link) and ('Chap' not in link) and ('chap' not in link) and (link not in root_link)
+def is_sub_url(chapter_url, manga_url):
+
+	return manga_url.lower() in chapter_url.lower()

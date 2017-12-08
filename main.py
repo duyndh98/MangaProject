@@ -19,5 +19,5 @@ from spider import Spider
 
 Spider(DOMAIN_NAME, HOMEPAGE)
 
-for x in Spider.manga_list:
-    print(x)
+# for x in Spider.manga_list:
+#     print(x)
