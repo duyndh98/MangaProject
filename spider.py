@@ -1,54 +1,63 @@
-from domain import get_domain_name
-import requests
-from bs4 import BeautifulSoup
-from urllib.parse import urljoin
-import re
+from header import *
+
 class Spider:
 
     # Class variables (shared among all instances)
     domain_name = ''
     base_url = ''
-    queue = set()
-    crawled = set()
 
+    manga_list = []
+    manga_crawled = []
+    
     def __init__(self, domain_name, base_url):
-        print(domain_name, base_url)
         
         Spider.domain_name = domain_name
         Spider.base_url = base_url
 
-        Spider.queue.add(base_url)
-        self.crawl_page('First spider', Spider.base_url)
+        Spider.manga_list.append(base_url)
+        
+        while (len(Spider.manga_list) + len(Spider.manga_crawled) < 100):
+            Spider.crawl_page()
 
-    @staticmethod
-    def crawl_page(thread_name, page_url):
-        if page_url not in Spider.crawled:
-            print(thread_name + ' now crawling ' + page_url)
-            print('Queue ' + str(len(Spider.queue)) + ' | ' +
-                  'Crawled ' + str(len(Spider.crawled)))
-            Spider.add_links_to_queue(Spider.gather_links(page_url))
-            Spider.queue.remove(page_url)
-            Spider.crawled.add(page_url)
+        Spider.manga_list = Spider.manga_list + Spider.manga_crawled
+        print(len(Spider.manga_list))
 
-    @staticmethod
+    #@staticmethod
+    def crawl_page():
+        page_url = Spider.manga_list[len(Spider.manga_list) - 1]
+        
+        Spider.manga_list.pop()
+        
+        if (is_manga_link(page_url)):
+            Spider.manga_crawled.append(page_url)
+        
+        Spider.add_links_to_list(Spider.gather_links(page_url))
+        
+        
+    #@staticmethod
     def gather_links(page_url):
-        results = set()
+        
+        results = []
         
         content = requests.get(page_url)
         
         soup = BeautifulSoup(content.text, 'html.parser')
 
-        for elem in soup.find_all('a', attrs={'href': re.compile("^http://")}):
+        for elem in soup.find_all('a', attrs={'href': re.compile('^http://')}):
             link = urljoin(page_url, elem['href'])
-            results.add(link)
-
+            results.append(link)
+            
         return results
 
-    @staticmethod
-    def add_links_to_queue(links):
+    #@staticmethod
+    def add_links_to_list(links):
+
         for url in links:
-            if (url in Spider.queue) or (url in Spider.crawled):
+
+            if (url in Spider.manga_list) or (url in Spider.manga_crawled):
                 continue
             if Spider.domain_name != get_domain_name(url):
                 continue
-            Spider.queue.add(url)
+            
+            if is_manga_link(url):
+                Spider.manga_list.append(url)
