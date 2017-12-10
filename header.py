@@ -3,6 +3,11 @@ import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 import re
+import scrapy
+import json
+import textwrap
+import lxml.html
+
 
 def get_domain_name(url):
     try:
@@ -18,18 +23,39 @@ def get_sub_domain_name(url):
     except:
         return ''
 
-HOMEPAGE = 'http://truyentranh.net/'
+HOMEPAGE = 'http://truyentranh.net'
 DOMAIN_NAME = get_domain_name(HOMEPAGE)
+MAX_MANGA = 3
+
 root_url = set(['http://truyentranh.net', 'http://truyentranh.net/blog'])
+image_format = ['.jpg', '.jpeg', '.png', '.gif', '.tiff', '.bmp']
 
 def is_manga_url(url):
 	
-	return ('html' not in url) and ('/Chap-' not in url) and ('/chap-' not in url) and (url not in root_url)
+	return ('html' not in url) and ('Chap-' not in url) and ('chap-' not in url) and (url not in root_url)
 
 def is_chapter_url(url):
 
-	return ('html' not in url) and (('/Chap-' in url) or ('/chap-' in url)) and (url not in root_url)
+	return ('html' not in url) and (('Chap-' in url) or ('chap-' in url)) and (url not in root_url)
 	
 def is_sub_url(chapter_url, manga_url):
 
 	return manga_url.lower() in chapter_url.lower()
+
+def is_content_url(content_url):
+
+	for x in image_format:
+		if x in content_url:
+			return True
+
+	return False
+
+def clean(str):
+	return " ".join(str.split())
+
+
+def intersect(s1, s2):
+    for length in range(len(s2) - 1, -1, -1):
+        for i in range(0, len(s2) - length + 1):
+            if s2[i:i + length] in s1:
+                return s2[i:i + length]

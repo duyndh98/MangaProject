@@ -1,23 +1,10 @@
-# import scrapy
-# import json
-# import re
-# import textwrap
+from spider import *
 
-# # open the file "filename" in write ("w") mode
-# file = open("manga_info.json", "w")
+data = []
 
-# # just an example dictionary to be dumped into "filename"
-# output = {"stuff": [1, 2, 3]}
+Spider(DOMAIN_NAME, HOMEPAGE, data)
 
-
-# # dumps "output" encoded in the JSON format into "filename"
-# json.dump(output, file)
-# file.close()
-
-from header import *
-from spider import Spider
-
-Spider(DOMAIN_NAME, HOMEPAGE)
-
-# for x in Spider.manga_list:
-#     print(x)
+with open('manga_info.json', 'w', encoding='utf-8') as outfile:
+	json.dump(data, outfile)
+		
+outfile.close()
