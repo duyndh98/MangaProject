@@ -8,47 +8,47 @@ class Spider:
     base_url = ''
 
     manga_list = []
-    manga_crawled = []
 
     chapter_list = []
-    chapter_crawled = []
 
     contents = []
 
-    def __init__(self, domain_name, base_url, data):
+    def __init__(self, domain_name, base_url, manga_data_list):
         
         Spider.domain_name = domain_name
         Spider.base_url = base_url
 
-        # crawl manga list
-        Spider.manga_list.append(base_url)
-        
-        while (len(Spider.manga_list) + len(Spider.manga_crawled) < MAX_MANGA):
-            Spider.crawl()
-      
-        Spider.manga_list = Spider.manga_list + Spider.manga_crawled
-        Spider.manga_crawled.clear()
+        # crawl manga list on home page
+        Spider.add_urls_to_list(Spider.gather_urls(base_url), 'manga')
 
-
-        index = 1
-        # crawl manga chapters
-        while len(Spider.manga_list) > 0:
+        i_manga_list = 0
+        while len(Spider.manga_list) < MAX_MANGA:
             
-            manga = Spider.manga_list[len(Spider.manga_list) - 1]
-            print('---------', manga)
+            Spider.add_urls_to_list(Spider.gather_urls(Spider.manga_list[i_manga_list]), 'manga')
+            i_manga_list += 1
+
+        Spider.crawl_manga_data_list(manga_data_list)
+
+    def crawl_manga_data_list(manga_data_list):
+
+        for i_manga_list in range(len(Spider.manga_list)):
+            
             manga_data = {}
 
+            manga = Spider.manga_list[i_manga_list]
+            print('---------', manga)
+            
             request = requests.get(manga)
             soup = BeautifulSoup(request.text, 'html.parser')
 
             description_class = soup.find('p', class_='description-update')
             description_info = description_class.find_all('br')
             
-            manga_data['manga_id'] = index
+            manga_data['manga_id'] = i_manga_list + 1
 
             manga_data['manga_name'] = clean(description_info[1].previous_sibling)
 
-            manga_data['thumbnail'] = ''
+            manga_data['thumbnail'] = soup.find('meta', {'property':'og:image'})['content']
 
             manga_data['author'] = clean(description_info[3].previous_sibling)
 
@@ -60,55 +60,44 @@ class Spider:
         
             manga_data['last_update'] = ''
 
-            manga_data['chapters'] = []
-            
-            Spider.manga_list.pop()
-            Spider.manga_crawled.append(manga)
-
+            Spider.chapter_list.clear()       
             Spider.add_urls_to_list(Spider.gather_urls(manga), 'chapter', manga)
             
             # insensitive sort
             Spider.chapter_list = sorted(Spider.chapter_list, key = lambda s : s.lower())
 
-            Spider.chapter_crawled.clear()
+            #Spider.chapter_crawled.clear()
 
-            # print('-------', manga)
-            # for chapter in Spider.chapter_list:
-            #     print(chapter)
+            chapter_data_list = []
+            Spider.crawl_chapter_data_list(chapter_data_list)
+            manga_data['chapters'] = chapter_data_list
 
-
-            # crawl contents
-            # while len(Spider.chapter_list) > 0:
-                
-            #     chapter = Spider.chapter_list[len(Spider.chapter_list) - 1]                
-            #     print("------------", chapter)
-
-            #     Spider.chapter_list.pop()
-            #     Spider.chapter_crawled.append(chapter)
-
-            #     Spider.add_urls_to_list(Spider.gather_urls(chapter, 'content'), 'content')
-
-            #     # for content in Spider.contents:
-            #     #     print(content)
-
-            #     Spider.contents.clear()
-
-            Spider.chapter_list.clear()
             
-            index += 1
+            manga_data_list.append(manga_data)
+
+
+    def crawl_chapter_data_list(chapter_data_list):
+        
+        for i_chapter_list in range(len(Spider.chapter_list)):
             
-            data.append(manga_data)
+            chapter_data = {}
 
-        
-    def crawl():
-        url = Spider.manga_list[len(Spider.manga_list) - 1]
-        
-        Spider.manga_list.pop()
+            chapter = Spider.chapter_list[i_chapter_list]                            
+            print(chapter)
 
-        if (is_manga_url(url)):
-            Spider.manga_crawled.append(url)
+            Spider.contents.clear() 
+            Spider.add_urls_to_list(Spider.gather_urls(chapter, 'content'), 'content')
 
-        Spider.add_urls_to_list(Spider.gather_urls(url), 'manga')
+            request = requests.get(chapter)
+            soup = BeautifulSoup(request.text, 'html.parser')
+
+            chapter_data['chapter_id'] = i_chapter_list + 1
+
+            chapter_data['chapter_name'] = soup.find('h1', class_='chapter-title').text
+
+            chapter_data['page_list'] = Spider.contents
+            
+            chapter_data_list.append(chapter_data)
         
     def gather_urls(url, type = ''):
         results = []
@@ -117,14 +106,13 @@ class Spider:
         
         soup = BeautifulSoup(request.text, 'html.parser')
 
-        #print(soup)
-
         if (type == 'content'):
-            # for elem in soup.find_all('img', attr={'src': }):
-                
-            #     url = urljoin(url, elem['href'])
-            #     results.append(url)
-            pass
+
+            contents = soup.find('div', class_='each-page').find_all('img')
+            
+            for content in contents:
+                results.append(content['src'])
+
         else:
             for elem in soup.find_all('a', attrs={'href': re.compile('^http://')}):
                 
@@ -134,17 +122,18 @@ class Spider:
         return results
 
     def add_urls_to_list(urls, type, manga_url = ''):
-        
+
+
         for url in urls:
-            if (type == 'manga') and (len(Spider.manga_list) + len(Spider.manga_crawled) >= MAX_MANGA):
+            if (type == 'manga') and (len(Spider.manga_list) >= MAX_MANGA):
                 return
 
-            if Spider.domain_name != get_domain_name(url):
+            if (type != 'content') and (Spider.domain_name != get_domain_name(url)):
                 continue
 
             if type == 'manga':
                 
-                if (url in Spider.manga_list) or (url in Spider.manga_crawled):
+                if (url in Spider.manga_list):
                     continue
                 
                 if is_manga_url(url):
@@ -160,10 +149,9 @@ class Spider:
 
             elif type == 'content':
 
-                #print(url)
-
                 if (url in Spider.contents):
                     continue
 
                 if is_content_url(url):
+
                     Spider.contents.append(url)

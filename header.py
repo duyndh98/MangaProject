@@ -25,18 +25,18 @@ def get_sub_domain_name(url):
 
 HOMEPAGE = 'http://truyentranh.net'
 DOMAIN_NAME = get_domain_name(HOMEPAGE)
-MAX_MANGA = 3
+MAX_MANGA = 2
 
 root_url = set(['http://truyentranh.net', 'http://truyentranh.net/blog'])
 image_format = ['.jpg', '.jpeg', '.png', '.gif', '.tiff', '.bmp']
 
 def is_manga_url(url):
 	
-	return ('html' not in url) and ('Chap-' not in url) and ('chap-' not in url) and (url not in root_url)
+	return ('html' not in url) and ('chap' not in url.lower()) and (url not in root_url) and (url.count('/') == 3)
 
 def is_chapter_url(url):
 
-	return ('html' not in url) and (('Chap-' in url) or ('chap-' in url)) and (url not in root_url)
+	return ('html' not in url) and ('chap' in url.lower()) and (url not in root_url) and (url.count('/') == 4)
 	
 def is_sub_url(chapter_url, manga_url):
 
