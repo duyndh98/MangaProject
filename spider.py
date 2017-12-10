@@ -108,10 +108,13 @@ class Spider:
 
         if (type == 'content'):
 
-            contents = soup.find('div', class_='each-page').find_all('img')
+            contents = soup.find('div', class_='each-page')
+            if contents == None:
+                contents = soup.find('div', class_='OtherText')
             
-            for content in contents:
-                results.append(content['src'])
+            imgs = contents.find_all('img')
+            for img in imgs:
+                results.append(img['src'])
 
         else:
             for elem in soup.find_all('a', attrs={'href': re.compile('^http://')}):

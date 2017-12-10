@@ -25,7 +25,7 @@ def get_sub_domain_name(url):
 
 HOMEPAGE = 'http://truyentranh.net'
 DOMAIN_NAME = get_domain_name(HOMEPAGE)
-MAX_MANGA = 2
+MAX_MANGA = 3
 
 root_url = set(['http://truyentranh.net', 'http://truyentranh.net/blog'])
 image_format = ['.jpg', '.jpeg', '.png', '.gif', '.tiff', '.bmp']
