@@ -19,7 +19,7 @@ class Spider:
         Spider.base_url = base_url
 
         # crawl manga list on home page
-        Spider.add_urls_to_list(Spider.gather_urls(base_url), 'manga')
+        Spider.add_urls_to_list(Spider.gather_urls(base_url, 'manga'), 'manga')
 
         i_manga_list = 0
         while len(Spider.manga_list) < MAX_MANGA:
@@ -36,7 +36,7 @@ class Spider:
             manga_data = {}
 
             manga = Spider.manga_list[i_manga_list]
-            print('---------', manga)
+            print(i_manga_list, '---------', manga)
             
             request = requests.get(manga)
             soup = BeautifulSoup(request.text, 'html.parser')
@@ -46,11 +46,11 @@ class Spider:
             
             manga_data['manga_id'] = i_manga_list + 1
 
-            manga_data['manga_name'] = clean(description_info[1].previous_sibling)
+            manga_data['manga_name'] = clean_string(description_info[1].previous_sibling)
 
             manga_data['thumbnail'] = soup.find('meta', {'property':'og:image'})['content']
 
-            manga_data['author'] = clean(description_info[3].previous_sibling)
+            manga_data['author'] = clean_string(description_info[3].previous_sibling)
 
             s1 = soup.find('p', class_='manga-collapse').find('p')
             s2 = soup.find('meta', {'name':'description'})['content']
@@ -58,10 +58,10 @@ class Spider:
 
             manga_data['categories'] = [x['title'] for x in description_class.find_all('a', class_='CateName')]
         
-            manga_data['last_update'] = ''
-
+            manga_data['last-update'] = find_last_update(soup.find('div', class_='content mCustomScrollbar').find_all('a'))
+            
             Spider.chapter_list.clear()       
-            Spider.add_urls_to_list(Spider.gather_urls(manga), 'chapter', manga)
+            Spider.add_urls_to_list(Spider.gather_urls(manga, 'chapter'), 'chapter', manga)
             
             # insensitive sort
             Spider.chapter_list = sorted(Spider.chapter_list, key = lambda s : s.lower())
@@ -106,8 +106,8 @@ class Spider:
         
         soup = BeautifulSoup(request.text, 'html.parser')
 
-        if (type == 'content'):
-
+        if type == 'content':
+            
             contents = soup.find('div', class_='each-page')
             if contents == None:
                 contents = soup.find('div', class_='OtherText')
@@ -116,12 +116,22 @@ class Spider:
             for img in imgs:
                 results.append(img['src'])
 
-        else:
+        elif type == 'chapter':
+            
+            chapters = soup.find('div', class_='content mCustomScrollbar').find_all('a')
+
+            for chapter in chapters:
+                
+                results.append(chapter['href'])
+                
+        elif type == 'manga':
+
             for elem in soup.find_all('a', attrs={'href': re.compile('^http://')}):
                 
                 url = urljoin(url, elem['href'])
                 results.append(url)
         
+
         return results
 
     def add_urls_to_list(urls, type, manga_url = ''):

@@ -7,7 +7,8 @@ import scrapy
 import json
 import textwrap
 import lxml.html
-
+import hashlib
+import datetime
 
 def get_domain_name(url):
     try:
@@ -25,7 +26,7 @@ def get_sub_domain_name(url):
 
 HOMEPAGE = 'http://truyentranh.net'
 DOMAIN_NAME = get_domain_name(HOMEPAGE)
-MAX_MANGA = 3
+MAX_MANGA = 10
 
 root_url = set(['http://truyentranh.net', 'http://truyentranh.net/blog'])
 image_format = ['.jpg', '.jpeg', '.png', '.gif', '.tiff', '.bmp']
@@ -50,8 +51,8 @@ def is_content_url(content_url):
 
 	return False
 
-def clean(str):
-	return " ".join(str.split())
+def clean_string(str):
+	return " ".join(str.split())	
 
 
 def intersect(s1, s2):
@@ -59,3 +60,21 @@ def intersect(s1, s2):
         for i in range(0, len(s2) - length + 1):
             if s2[i:i + length] in s1:
                 return s2[i:i + length]
+
+def later(date1, date2):
+	if date2 == '':
+		return date1
+	return max([date1, date2], key=lambda x: datetime.datetime.strptime(x, "%d/%m/%Y"))
+
+
+def find_last_update(chapters):
+	
+	last_date = ''
+
+	for chapter in chapters:
+		
+		date = chapter.find('span', class_='date-release').text
+		last_date = date if last_date == '' else max([date, last_date], key=lambda x: datetime.datetime.strptime(x, "%d/%m/%Y"))
+	
+	print(last_date)	
+	return last_date
