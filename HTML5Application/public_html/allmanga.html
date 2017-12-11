@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>Manga List</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"> </script>
+        <script>
+            $(function() {
+                var manga = [];
+                $.getJSON('manga_info.json', function(data) {
+                    $.each(data, function(i, f) {
+                        var link_name = "manga_info.html?id="+f.manga_id
+                        var tblRow = "<tr>" + 
+                                "<td><a href =" + link_name + ">" + f.manga_name + "</a></td>" + 
+                                "<td>" + f.author + "</td>" + 
+                                "<td>" + f.description + "</td>" + 
+                                "<td>" + f.last_update + "</td>" + 
+                                "</tr>"
+                        $(tblRow).appendTo("#userdata tbody");
+                    });
+                });
+            });
+            
+        </script>
+    </head>
+    <body>
+        <table id = "userdata" border ="2" >
+            <thead>
+                <th>Name</th>
+                <th>Author</th>
+                <th>Description</th>
+                <th>Last Update</th>
+            </thead>
+            <tbody>
+                
+            </tbody>
+        </table>
+    </body>
+</html>
