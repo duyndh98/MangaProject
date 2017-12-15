@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>Manga Info</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"> </script>
+        <script>
+            function GetURLParameter(sParam)
+            {
+                var sPageURL = window.location.search.substring(1);
+                var sURLVariables = sPageURL.split('&');
+                for (var i = 0; i < sURLVariables.length; i++)
+                {
+                    var sParameterName = sURLVariables[i].split('=');
+                    if (sParameterName[0] == sParam)
+                    {
+                        return sParameterName[1];
+                    }
+                }
+            }
+            var id_manga_request = GetURLParameter('id');
+            $(function() {
+                $.getJSON('manga_info.json', function(data) {                    
+                    $.each(data, function(i, f) {
+                         if (f.manga_id == id_manga_request)
+                         {
+                             var chapter = "";
+                             for (i = 0; i < f.chapters.length ; i++ ) {
+                                 if (i%2==0)
+                                     chapter += "<tr>"
+                                 chapter += "<td>"
+                                 var link_name_chapter = "chapter.html?id=" + f.chapters[i].chapter_id + "&id_manga=" + f.manga_id;
+                                 chapter += "Chapter " + (i+1) + ": <a href = " + link_name_chapter + " target = " + "_parent" + " >"+ f.chapters[i].chapter_name + "</a>";
+                                 chapter += "</td>"
+                                 if (i%2 == 1)
+                                     chapter += "</tr>"
+                             }
+                             if (f.chapters.length %2 != 0)
+                                 chapter += "</tr>"
+                             $(chapter).appendTo("#scroll_chapters tbody");
+                         }
+                    });                    
+                });
+            });
+        </script>
+    </head>
+    <body text = "#FA07FA" link = "#07FA1C">
+        <table id="scroll_chapters" align = "Center">
+            <thead>
+                
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </body>
+</html>

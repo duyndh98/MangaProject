@@ -7,6 +7,7 @@ and open the template in the editor.
 <html>
     <head>
         <title>Chapter Info</title>
+        <link rel="stylesheet" href="manga-reader.css"/>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"> </script>
@@ -24,19 +25,32 @@ and open the template in the editor.
                     }
                 }
             }
-            var id_manga_request = GetURLParameter('id_manga')
-            var id_chapter_request = GetURLParameter('id')
+            var id_manga_request = GetURLParameter('id_manga');
+            var id_chapter_request = GetURLParameter('id');
             $(function() {
                 $.getJSON('manga_info.json', function(data) {
                     $.each(data, function(i, dt) {
                         if (dt.manga_id == id_manga_request) {
                             $.each(dt.chapters, function(ii, f_chapter){
                                 if (f_chapter.chapter_id == id_chapter_request) {
-                                    for (count = 0 ;count < f_chapter.page_list.length ; count ++ ) {
-                                        var link_image = "" + f_chapter.page_list[count]
-                                        var img = "<tr><td><img src=" + link_image + "></td></tr>"
-                                        $(img).appendTo("#img tbody")
-                                    }
+                                    var img ="";
+                                    img += "<tr>"
+                                    img += "<td><a href = " + "manga_info.html?id=" + id_manga_request + ">Manga_info</a></td>";
+                                    img += "</tr>"
+                                    
+                                    img += "<tr><td><iframe src= " + "Scroll_Content_Chapter.html?id="+ id_chapter_request +"&id_manga=" + id_manga_request + " width = "+ screen.width/1.6 +" height = "+ screen.height*0.9 +"></iframe></td></tr>"
+                                    
+                                    img += "<tr>";
+                                    
+                                    img += "<td><a href = " + "chapter.html?id=" + ((id_chapter_request > 1) ? id_chapter_request-1: id_chapter_request) + "&id_manga=" + id_manga_request + "" + ">Chapter Previous</a> </td>"
+            
+                                    var count = ++id_chapter_request;
+                                    id_chapter_request--;
+                                    img += "<td><a href = " + "chapter.html?id=" + ((id_chapter_request < dt.chapters.length) ? count: id_chapter_request) + "&id_manga=" + id_manga_request + "" + ">Chapter Next</a> </td>"
+                                    
+                                    img += "</tr>";
+                                    $(img).appendTo("#img tbody");
+                                    
                                 }
                             });
                         }
@@ -45,10 +59,9 @@ and open the template in the editor.
             });
         </script>
     </head>
-    <body>
-        <table id="img" align = "Center"> 
+    <body id="bgread" text = "#FA07FA" link = "#07FA1C">
+        <table id="img" align ="Center" > 
             <thead>
-                <th></th>
             </thead>
             <tbody>
                 

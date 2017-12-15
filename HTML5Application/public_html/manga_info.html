@@ -7,6 +7,7 @@ and open the template in the editor.
 <html>
     <head>
         <title>Manga Info</title>
+        <link rel="stylesheet" href="manga-reader.css"/>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"> </script>
@@ -26,38 +27,42 @@ and open the template in the editor.
             }
             var id_manga_request = GetURLParameter('id');
             $(function() {
-                $.getJSON('manga_info.json', function(data) {
+                $.getJSON('manga_info.json', function(data) {                    
                     $.each(data, function(i, f) {
                          if (f.manga_id == id_manga_request)
                          {
-                             var chapter = "<ol>"
-                             $.each(f.chapters , function(ii,dt) {
-                                 var link_name_chapter = "chapter.html?id=" + dt.chapter_id + "&id_manga="+f.manga_id
-                                 chapter += "<li><a href = " + link_name_chapter + ">"+dt.chapter_name + "</a></li>"
-                             });
-                             chapter += "</ol>"
-                             var info = "<tr>" +
-                                     "<td>" + f.manga_name + "</td>" +
-                                     "<td>" + f.author + "</td>" +
-                                     "<td>" + f.description + "</td>" +
-                                     "<td>" + f.categories + "</td>" +
-                                     "<td>" + chapter + "</td>" +
-                                     "</tr>"
-                             $(info).appendTo("#info_author tbody")
+                             var chapter = ""
+                             for (i = 0; i < f.chapters.length ; i++ ) {
+                                 var link_name_chapter = "chapter.html?id=" + f.chapters[i].chapter_id + "&id_manga=" + f.manga_id
+                                 chapter += "<div> Chapter " + (i+1) + ": <a href = " + link_name_chapter + ">"+ f.chapters[i].chapter_name + "</a></div>"
+                             }
+                             var info = "";
+                             info += "<table>"
+                             info += "<tr><td><a href = " + "allmanga.html" + ">Home</a></td></tr>"
+                             info += "<tr>";
+                             info += "<td><img src = " + f.thumbnail + "  width = " + screen.width/3.2 + " height = " + screen.height/1.64 + " title = " + f.manga_name + "  ></td>";
+                             info += "<td>";
+                             info += "<div> Name:         " + f.manga_name + "</div>";
+                             info += "<div> Categories:   " + f.categories + "</div>";
+                             info += "<div> Author:       " + f.author + "</div>";
+                             info += "<div> Chapters:     " + f.chapters.length + "</div>";
+                             info += "<div> Description:  " + f.description + "</div>";
+                             info += "</td>";
+                             info += "</tr>";
+                             info += "<tr><td colspan = "+"2"+" > <iframe src = " + "Scroll_Chapters.html?id=" + id_manga_request +" width = " + screen.width/1.8 + "><p>Can't dislay.......</p></iframe></td></tr>";
+                             info += "</table>"
+                             $(info).appendTo("#info_author tbody");
+                             
                          }
-                    });
+                    });                    
                 });
             });
         </script>
     </head>
-    <body>
-        <table id="info_author" border = "2">
-            <theah>
-                <th>Name</th>
-                <th>Author</th>
-                <th>Description</th>
-                <th>Categories</th>
-                <th>Chaper List</th>
+    <body id="header" text = "#FA07FA" link = "#07FA1C">
+        
+        <table id="info_author" align = "Center" width = "800">
+            <thead>
             </thead>
             <tbody>
             </tbody>

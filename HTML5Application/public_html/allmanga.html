@@ -6,40 +6,61 @@ and open the template in the editor.
 -->
 <html>
     <head>
-        <title>Manga List</title>
+        <link rel="stylesheet" href="manga-reader.css"/>
+        <title>Manga Reader </title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"> </script>
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"> </script>     
         <script>
             $(function() {
                 var manga = [];
                 $.getJSON('manga_info.json', function(data) {
-                    $.each(data, function(i, f) {
-                        var link_name = "manga_info.html?id="+f.manga_id
-                        var tblRow = "<tr>" + 
-                                "<td><a href =" + link_name + ">" + f.manga_name + "</a></td>" + 
-                                "<td>" + f.author + "</td>" + 
-                                "<td>" + f.description + "</td>" + 
-                                "<td>" + f.last_update + "</td>" + 
-                                "</tr>"
-                        $(tblRow).appendTo("#userdata tbody");
-                    });
+                    var tblRows = "";
+                    
+                    for (i = 0; i< data.length;i++) {
+                        if (i%2 == 0 ) 
+                            tblRows += "<tr>";
+                        tblRows += "<td>";
+                        tblRows += "<table><tr>";
+                        var link = "manga_info.html?id="+ data[i].manga_id;
+                        
+                        tblRows += "<td><a href = " + link + " target = " + "_parent" + "><img src = " + data[i].thumbnail + " width = " + screen.width/9.6 + " height = " + screen.height/4.5 + " title = " + data[i].manga_name + "></a></td>"
+                        tblRows += "<td><div> Name: <a href = " + link + " target = " + "_parent" + "   >" + data[i].manga_name + "</a><br> Categories: " + data[i].categories + "<br> Author: " + data[i].author + "<br> Chapters: " + data[i].chapters.length + "</div></td>"
+                        tblRows += "</tr></table>"
+                        tblRows += "</td>"
+                        if (i%2 == 1)
+                            tblRows += "<tr>"
+                    }
+                    
+                    if (data.length % 2 != 0)
+                        tblRows += "<tr>"
+                    
+                    $(tblRows).appendTo("#userdata tbody") 
                 });
             });
             
         </script>
     </head>
-    <body>
-        <table id = "userdata" border ="2" >
+
+    <body  id="bgmangaread"  text = "#C300FF" link = "#002AFF">
+        
+        <audio controls autoplay>               
+            <source src="source/4262ad5e0075.mp3" type="audio/mp3">
+            Your browser does not support the audio element.
+        </audio>
+        <h1 id="backtotop" align ="Center" ><span id="fontReadManga">Manga Reader</span></h1>
+        <a href="#goend"> Go End</a>
+
+        
+        
+        <table id = "userdata" align = "Center">
             <thead>
-                <th>Name</th>
-                <th>Author</th>
-                <th>Description</th>
-                <th>Last Update</th>
+                
             </thead>
             <tbody>
                 
             </tbody>
         </table>
+        <a id="goend" href="#backtotop">Back To Top</a>
     </body>
 </html>

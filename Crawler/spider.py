@@ -24,45 +24,49 @@ class Spider:
         for i_manga_list in range(len(Spider.manga_list)):
             manga_data = {}
 
-            try:
+            i_try = 0
+            while i_try < 3:
+                try:
+                    manga_url = Spider.manga_list[i_manga_list]
+                    print(i_manga_list + 1, '---------', manga_url)
+                    
+                    request = requests.get(manga_url)
+                    soup = BeautifulSoup(request.text, 'html.parser')
 
-                manga_url = Spider.manga_list[i_manga_list]
-                print(i_manga_list + 1, '---------', manga_url)
+                    description_update = soup.find('p', class_='description-update')
+                    
+                    manga_data['manga_id'] = i_manga_list + 1
+
+                    manga_data['manga_name'] = soup.find('h1', class_='title-manga').text
+                    
+                    manga_data['thumbnail'] = soup.find('meta', {'property':'og:image'})['content']
+
+                    manga_data['author'] = clean_string(str((description_update.find_all('span')[3]).next_sibling))
+
+                    manga_collapse = soup.find('p', class_='manga-collapse')
+                    manga_data['description'] = clean_string(str(manga_collapse.text).replace(str(manga_collapse.find('b').text), ''))
+                    
+                    manga_data['categories'] = [x['title'] for x in description_update.find_all('a', class_="CateName")]
                 
-                request = requests.get(manga_url)
-                soup = BeautifulSoup(request.text, 'html.parser')
+                    manga_data['last-update'] = find_last_update(soup.find('div', class_='content mCustomScrollbar').find_all('a'))
+                    
+                    Spider.chapter_list.clear()       
+                    Spider.gather_urls(manga_url, 'chapter')
+                    
+                    Spider.chapter_list = sorted(Spider.chapter_list, key = lambda s : s.lower())
 
-                description_update = soup.find('p', class_='description-update')
-                
-                manga_data['manga_id'] = i_manga_list + 1
+                    chapter_data_list = []
+                    Spider.crawl_chapter_data_list(chapter_data_list)
+                    
+                    manga_data['chapters'] = copy.deepcopy(chapter_data_list)
 
-                manga_data['manga_name'] = soup.find('h1', class_='title-manga').text
-                
-                manga_data['thumbnail'] = soup.find('meta', {'property':'og:image'})['content']
+                    break
 
-                manga_data['author'] = clean_string(str((description_update.find_all('span')[3]).next_sibling))
-
-                manga_collapse = soup.find('p', class_='manga-collapse')
-                manga_data['description'] = clean_string(str(manga_collapse.text).replace(str(manga_collapse.find('b').text), ''))
-                
-                manga_data['categories'] = [x['title'] for x in description_update.find_all('a', class_="CateName")]
+                except:
+                    print('exception manga !')
+                    manga_data = {}
+                    i_try += 1
             
-                manga_data['last-update'] = find_last_update(soup.find('div', class_='content mCustomScrollbar').find_all('a'))
-                
-                Spider.chapter_list.clear()       
-                Spider.gather_urls(manga_url, 'chapter')
-                
-                Spider.chapter_list = sorted(Spider.chapter_list, key = lambda s : s.lower())
-
-                chapter_data_list = []
-                Spider.crawl_chapter_data_list(chapter_data_list)
-                
-
-                manga_data['chapters'] = copy.deepcopy(chapter_data_list)
-
-            except:
-                manga_data = {}
-
             manga_data_list.append(manga_data)
 
     def crawl_chapter_data_list(chapter_data_list):
@@ -70,24 +74,30 @@ class Spider:
         for i_chapter_list in range(len(Spider.chapter_list)):    
             chapter_data = {}
             
-            try:
-                chapter_url = Spider.chapter_list[i_chapter_list] 
-                print(chapter_url)                         
+            i_try = 0
+            while i_try < 3:
+                try:
+                    chapter_url = Spider.chapter_list[i_chapter_list] 
+                    print(chapter_url)                         
 
-                request = requests.get(chapter_url)
-                soup = BeautifulSoup(request.text, 'html.parser')
+                    request = requests.get(chapter_url)
+                    soup = BeautifulSoup(request.text, 'html.parser')
 
-                chapter_data['chapter_id'] = i_chapter_list + 1
+                    chapter_data['chapter_id'] = i_chapter_list + 1
 
-                chapter_data['chapter_name'] = soup.find('h1', class_='chapter-title').text
+                    chapter_data['chapter_name'] = soup.find('h1', class_='chapter-title').text
 
-                Spider.contents.clear()
-                Spider.gather_urls(chapter_url, 'content')
-                chapter_data['page_list'] = copy.deepcopy(Spider.contents)
-            
-            except:
-                chapter_data = {}
-            
+                    Spider.contents.clear()
+                    Spider.gather_urls(chapter_url, 'content')
+                    chapter_data['page_list'] = copy.deepcopy(Spider.contents)
+                
+                    break
+
+                except:
+                    print('exception chapter !')
+                    chapter_data = {}
+                    i_try += 1
+                
             chapter_data_list.append(chapter_data)
 
     def gather_urls(url, type):

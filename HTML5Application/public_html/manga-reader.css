@@ -1,0 +1,36 @@
+#header {
+    /* Ảnh nền */
+    background-image: url('source/thien_nhien.jpg');
+    /* Kích thước #header */
+    width: 100%;
+    height: 100%;
+    margin: 0 auto; /* Căn giữa trang */
+  }
+  #bgmangaread {
+    /* Ảnh nền */
+    background-image: url('source/hoa_hong.jpg');
+    /* Kích thước #header */
+    width: 100%;
+    height: 100%;
+    margin: 10% ; /* Căn giữa trang */
+    
+  }
+  #bgread {
+    /* Ảnh nền */
+    background-image: url('source/gach_xep.jpg');
+    /* Kích thước #header */
+    width: 100%;
+    height: 100%;
+    margin: 0 auto; /* Căn giữa trang */
+  }
+  /* font chữ*/
+  #fontReadManga {
+      text-align: justify;
+      text-shadow: black 7px 9px 10px;
+      text-transform: uppercase;
+      font-family: Helvetica, Arial, Tahoma, sans-serif;
+      font-weight:720;
+      color:#8B0000;
+      font-size: 60px
+  
+  }
